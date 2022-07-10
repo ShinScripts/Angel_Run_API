@@ -21,6 +21,7 @@ export class Server {
 
 	public init(client: Client) {
 		const app = express().use(express.json());
+		const playerData = db.get('playerData') as User[];
 
 		// [GET] landing page
 		app.get('/', (req, res) => {
@@ -41,10 +42,10 @@ export class Server {
 				return;
 			}
 
-			if ((db.get('playerData') as User[]).find((player) => player.username === username)) {
+			if (playerData.find((player) => player.username === username)) {
 				db.set(
 					'playerData',
-					(db.get('playerData') as User[]).map((player, i) => {
+					playerData.map((player, i) => {
 						if (player.username === username)
 							return {
 								username,
@@ -52,13 +53,13 @@ export class Server {
 							};
 
 						return {
-							username: (db.get('playerData') as User[])[i].username,
-							score: Number((db.get('playerData') as User[])[i].score),
+							username: playerData[i].username,
+							score: Number(playerData[i].score),
 						};
 					})
 				);
 			} else {
-				const arr = db.get('playerData') as User[];
+				const arr = playerData;
 				arr.push({ username, score: Number(score) });
 
 				db.set('playerData', arr);
